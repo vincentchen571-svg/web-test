@@ -5,23 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our 3rd Anniversary ❤️</title>
     <style>
-        :root { --primary-color: #ff7675; --bg-color: #fff5f5; }
+        :root { --primary-color: #ff7675; --error-color: #d63031; --bg-color: #fff5f5; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        #main-card { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
+        #main-card { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; position: relative; }
         .btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; margin: 8px; border-radius: 12px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.3s; }
         .hidden { display: none; }
         .answer-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 15px; margin: 15px 0; border: 2px solid #eee; }
-        #feedback { color: #d63031; font-weight: bold; margin-top: 10px; }
-        .loading-bar { height: 4px; background: #fab1a0; width: 0%; margin-top: 10px; transition: width 2s linear; }
+        
+        /* 狀態文字樣式 */
+        #feedback { color: #2ecc71; font-weight: bold; margin-top: 10px; }
+        #error-hint { color: var(--error-color); font-weight: bold; margin-top: 10px; min-height: 24px; opacity: 0; transition: opacity 0.3s; }
+        .show-error { opacity: 1 !important; }
+
+        /* 進度條 */
+        .loading-bar-container { background: #eee; height: 6px; border-radius: 3px; margin-top: 15px; overflow: hidden; }
+        .loading-bar { height: 100%; background: #fab1a0; width: 0%; transition: width 2.5s linear; }
     </style>
 </head>
 <body>
 
 <div id="main-card">
     <div id="start-section">
-        <h2 style="font-size: 24px;">Hi 寶貝！❤️<br>三週年問答挑戰挑戰</h2>
-        <p>答對後會自動進入下一題喔！</p>
-        <button class="btn" onclick="startQuiz()">點我開始</button>
+        <h2 style="font-size: 24px;">Hi 寶貝！❤️<br>三週年問答挑戰</h2>
+        <p>準備好就點擊開始吧！</p>
+        <button class="btn" onclick="startQuiz()">開始挑戰</button>
     </div>
 
     <div id="quiz-section" class="hidden">
@@ -29,43 +36,48 @@
         <img id="question-img" class="answer-img hidden" src="">
         
         <div id="options-container"></div>
+        
+        <p id="error-hint">答錯囉，再想一下！😘</p>
 
         <div id="result-area" class="hidden">
             <p id="feedback"></p>
             <img id="success-img" class="answer-img" src="">
-            <div id="progress" class="loading-bar"></div>
-            <p style="font-size: 12px; color: #aaa;">即將進入下一題...</p>
+            <div class="loading-bar-container">
+                <div id="progress" class="loading-bar"></div>
+            </div>
+            <p style="font-size: 12px; color: #aaa; margin-top: 5px;">即將進入下一題...</p>
         </div>
     </div>
 
     <div id="memory-machine" class="hidden">
         <h1 style="color: #d63031;">Happy 3rd Anniversary!</h1>
-        <p>這三年有妳，每天都是驚喜。</p>
-        <img src="img/final.jpg" class="answer-img" style="display:block;">
+        <p>謝謝妳這三年的陪伴。</p>
+        <img src="img/final.jpg" class="answer-img" style="display:block;" onerror="this.src='https://via.placeholder.com/400x300?text=I+Love+You'">
     </div>
 </div>
 
 <script>
     const quizData = [
         {
-            q: "這張照片是在哪裡拍的？",
-            qImg: "img/q1.jpg", // 題目要顯示的照片
-            options: ["淡水", "九份", "上野"],
-            ans: 2,
-            sImg: "img/s1.jpg", // 答對後顯示的照片
-            msg: "✅ 沒錯！就是上野公園，那天妳好漂亮。"
+            q: "去年我們在東京，妳在哪裡買到 Hello Kitty 的？",
+            qImg: "", 
+            options: ["原宿", "新宿", "上野"],
+            ans: 0,
+            sImg: "img/s1.jpg", 
+            msg: "✅ 沒錯！就是在原宿買到的！"
         },
         {
-            q: "我們交往的第一個紀念日吃了什麼？",
-            qImg: "", // 若這題不想顯示題目圖，留空即可
-            options: ["燒肉", "火鍋", "義大利麵"],
-            ans: 0,
+            q: "這張照片是我們在哪裡拍的？",
+            qImg: "img/q2.jpg", 
+            options: ["淡水", "九份", "基隆"],
+            ans: 1,
             sImg: "img/s2.jpg",
-            msg: "✅ 居然還記得！那家燒肉真的超好吃的。"
+            msg: "✅ 答對了！那天九份的霧好大。"
         }
     ];
 
     let currentQ = 0;
+    let errorTimeout;
 
     function startQuiz() {
         document.getElementById('start-section').classList.add('hidden');
@@ -75,12 +87,12 @@
 
     function showQuestion() {
         const data = quizData[currentQ];
-        document.getElementById('question').innerText = data.q;
+        document.getElementById('question').innerText = `Q${currentQ + 1}: ${data.q}`;
         document.getElementById('result-area').classList.add('hidden');
         document.getElementById('options-container').classList.remove('hidden');
+        document.getElementById('error-hint').classList.remove('show-error');
         document.getElementById('progress').style.width = "0%";
 
-        // 處理題目照片
         const qImgTag = document.getElementById('question-img');
         if(data.qImg) {
             qImgTag.src = data.qImg;
@@ -103,17 +115,17 @@
     function checkAnswer(index) {
         const data = quizData[currentQ];
         if (index === data.ans) {
+            // 答對邏輯
             document.getElementById('options-container').classList.add('hidden');
-            document.getElementById('question-img').classList.add('hidden'); // 答對後藏起題目圖
+            document.getElementById('question-img').classList.add('hidden');
+            document.getElementById('error-hint').classList.remove('show-error');
             document.getElementById('result-area').classList.remove('hidden');
             
             document.getElementById('feedback').innerText = data.msg;
             document.getElementById('success-img').src = data.sImg;
             
-            // 啟動進度條動畫
             setTimeout(() => { document.getElementById('progress').style.width = "100%"; }, 50);
 
-            // 2.5秒後自動下一題
             setTimeout(() => {
                 currentQ++;
                 if (currentQ < quizData.length) {
@@ -123,7 +135,14 @@
                 }
             }, 2500);
         } else {
-            alert("答錯啦！再試一次？");
+            // 答錯邏輯：顯示紅字提示，2秒後消失
+            const errorHint = document.getElementById('error-hint');
+            errorHint.classList.add('show-error');
+            
+            clearTimeout(errorTimeout);
+            errorTimeout = setTimeout(() => {
+                errorHint.classList.remove('show-error');
+            }, 2000);
         }
     }
 
@@ -132,8 +151,5 @@
         document.getElementById('memory-machine').classList.remove('hidden');
     }
 </script>
-</body>
-</html>
-
 </body>
 </html>
