@@ -3,109 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our 3rd Anniversary</title>
+    <title>Our 3rd Anniversary ❤️</title>
     <style>
-        /* CSS：這裡負責讓網頁變漂亮 (例如粉色背景、字體大小) */
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #fff5f5; text-align: center; color: #4a4a4a; margin: 0; padding: 20px; }
-        #main-card { background: white; max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        button { background-color: #ff7675; color: white; border: none; padding: 10px 20px; margin: 10px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        button:hover { background-color: #d63031; transform: scale(1.05); }
-        img { max-width: 100%; border-radius: 15px; margin-top: 20px; display: none; }
+        :root {
+            --primary-color: #ff7675;
+            --secondary-color: #74b9ff;
+            --bg-color: #fff5f5;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #main-card {
+            background: white;
+            width: 90%;
+            max-width: 450px;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 { color: #2d3436; margin-bottom: 25px; line-height: 1.4; }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,118,117,0.3); }
+
+        #next-btn { background-color: #00b894; margin-top: 20px; }
+
         .hidden { display: none; }
-        #memory-machine h1 { color: #d63031; }
+
+        .answer-img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 15px 0;
+            border: 3px solid #f1f2f6;
+        }
+
+        #feedback { color: #636e72; font-size: 15px; background: #f9f9f9; padding: 10px; border-radius: 10px; }
+
+        /* 回憶頁面樣式 */
+        #memory-machine h1 { color: #d63031; margin-bottom: 10px; }
+        .heart { font-size: 50px; color: #e17055; animation: beat 1s infinite alternate; }
+        @keyframes beat { from { transform: scale(1); } to { transform: scale(1.1); } }
     </style>
 </head>
 <body>
 
-    <div id="main-card">
-        <div id="quiz-section">
-            <h2 id="question">準備好接受挑戰了嗎？</h2>
-            <div id="options-container">
-                <button onclick="startQuiz()">開始挑戰</button>
-            </div>
-            <p id="feedback"></p>
-            <img id="answer-img" src="">
-        </div>
+<div id="main-card">
+    <div id="start-section">
+        <div class="heart">❤️</div>
+        <h2>Hi 寶貝！<br>準備好進行三週年挑戰了嗎？</h2>
+        <button class="btn" onclick="startQuiz()">點我開始！</button>
+    </div>
 
-        <div id="memory-machine" class="hidden">
-            <h1>❤️ 三週年快樂 ❤️</h1>
-            <p>恭喜妳通過考驗！這三年有妳真好。</p>
-            <p>【這裡可以寫下妳想對她說的最感性的話】</p>
-            <img id="final-photo" src="your_final_photo.jpg" style="display:block;">
+    <div id="quiz-section" class="hidden">
+        <h2 id="question">題目載入中...</h2>
+        
+        <div id="options-container">
+            </div>
+
+        <div id="result-area" class="hidden">
+            <img id="answer-img" class="answer-img" src="" alt="我們的回憶">
+            <p id="feedback"></p>
+            <button id="next-btn" class="btn" onclick="nextQuestion()">點我進入下一題 ➔</button>
         </div>
     </div>
 
-    <script>
-        /* JavaScript：這裡負責控制邏輯 (答對了才跳下一題) */
+    <div id="memory-machine" class="hidden">
+        <div class="heart">💝</div>
+        <h1>3rd Anniversary</h1>
+        <p>恭喜妳通過考驗！</p>
+        <p style="text-align: left; line-height: 1.8; color: #636e72;">
+            謝謝妳這三年的陪伴，<br>
+            從我們第一次見面到現在，<br>
+            每一段回憶對我來說都很珍貴。<br>
+            我會一直牽著妳的手走下去的！
+        </p>
+        <img src="final.jpg" class="answer-img" alt="最後的合照" onerror="this.src='https://via.placeholder.com/400x300?text=Happy+3rd+Anniversary'">
+    </div>
+</div>
+
+<script>
+    // 【你可以修改這裡的題目內容】
+    const quizData = [
+        {
+            q: "去年我們在東京，妳在哪裡買到 Hello Kitty 的？",
+            options: ["原宿", "新宿", "上野"],
+            ans: 0,
+            img: "photo1.jpg", // 放在同一個資料夾的照片檔名
+            msg: "✅ 沒錯！妳那天在原宿買到超開心，那個笑容我記得超清楚。"
+        },
+        {
+            q: "我們交往三週年的正確日期是？",
+            options: ["2月1日", "2月3日", "2月4日"],
+            ans: 2,
+            img: "photo2.jpg",
+            msg: "✅ 算妳聰明！這題答錯的話我就要哭囉。"
+        },
+        {
+            q: "這張照片是我們在哪裡拍的？", // 提示：可以搭配圖片
+            options: ["淡水碼頭", "九份老街", "陽明山"],
+            ans: 1,
+            img: "photo3.jpg",
+            msg: "✅ 對耶！那天雖然下雨，但跟妳一起撐傘逛街超浪漫。"
+        }
+    ];
+
+    let currentQ = 0;
+
+    function startQuiz() {
+        document.getElementById('start-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const data = quizData[currentQ];
+        document.getElementById('question').innerText = `Q${currentQ + 1}: ${data.q}`;
         
-        // 【你可以改這裡：題目內容】
-        const quizData = [
-            {
-                q: "去年我們在東京，妳在哪裡買到 Hello Kitty 的？",
-                options: ["原宿", "新宿", "上野"],
-                ans: 0, // 選項從0開始算，0是原宿
-                img: "https://via.placeholder.com/300/ff7675/ffffff?text=Hello+Kitty+Day", // 放照片網址或檔名
-                msg: "沒錯！那天妳超開心的～"
-            },
-            {
-                q: "我們三週年的紀念日是哪一天？",
-                options: ["1/30", "2/1", "2/4"],
-                ans: 2, 
-                img: "https://via.placeholder.com/300/fab1a0/ffffff?text=Special+Day",
-                msg: "這題答錯就太過分囉！"
-            }
-        ];
+        // 隱藏結果區，顯示選項區
+        document.getElementById('result-area').classList.add('hidden');
+        const container = document.getElementById('options-container');
+        container.classList.remove('hidden');
+        container.innerHTML = ""; 
+        
+        data.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = "btn";
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(index);
+            container.appendChild(btn);
+        });
+    }
 
-        let currentQ = 0;
-
-        function startQuiz() {
-            showQuestion();
-        }
-
-        function showQuestion() {
-            const data = quizData[currentQ];
-            document.getElementById('question').innerText = data.q;
-            document.getElementById('feedback').innerText = "";
-            document.getElementById('answer-img').style.display = 'none';
+    function checkAnswer(index) {
+        const data = quizData[currentQ];
+        if (index === data.ans) {
+            // 答對了：隱藏選項，顯示結果區
+            document.getElementById('options-container').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
             
-            const container = document.getElementById('options-container');
-            container.innerHTML = ""; 
-            
-            data.options.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(index);
-                container.appendChild(btn);
-            });
-        }
-
-        function checkAnswer(index) {
-            const data = quizData[currentQ];
+            document.getElementById('feedback').innerText = data.msg;
+            // 更新圖片，若圖片不存在則顯示佔位圖
             const imgTag = document.getElementById('answer-img');
-            
-            if (index === data.ans) {
-                document.getElementById('feedback').innerText = "✅ " + data.msg;
-                imgTag.src = data.img;
-                imgTag.style.display = 'block';
-                
-                // 答對後過 2 秒跳下一題或結束
-                setTimeout(() => {
-                    currentQ++;
-                    if (currentQ < quizData.length) {
-                        showQuestion();
-                    } else {
-                        showFinal();
-                    }
-                }, 2500);
-            } else {
-                document.getElementById('feedback').innerText = "❌ 答錯啦！再給妳一次機會（或是親我一下）";
-            }
+            imgTag.src = data.img;
+            imgTag.onerror = function() {
+                this.src = "https://via.placeholder.com/400x300?text=Memory+Photo";
+            };
+        } else {
+            alert("答錯囉！再給妳一次機會（或是親我一口）😘");
         }
+    }
 
-        function showFinal() {
-            document.getElementById('quiz-section').classList.add('hidden');
-            document.getElementById('memory-machine').classList.remove('hidden');
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < quizData.length) {
+            showQuestion();
+        } else {
+            showFinal();
         }
-    </script>
+    }
+
+    function showFinal() {
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('memory-machine').classList.remove('hidden');
+    }
+</script>
+
 </body>
 </html>
