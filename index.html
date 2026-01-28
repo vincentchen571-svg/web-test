@@ -1,21 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-    <title>My First Web</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our 3rd Anniversary</title>
+    <style>
+        /* CSS：這裡負責讓網頁變漂亮 (例如粉色背景、字體大小) */
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: #fff5f5; text-align: center; color: #4a4a4a; margin: 0; padding: 20px; }
+        #main-card { background: white; max-width: 500px; margin: 50px auto; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        button { background-color: #ff7675; color: white; border: none; padding: 10px 20px; margin: 10px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        button:hover { background-color: #d63031; transform: scale(1.05); }
+        img { max-width: 100%; border-radius: 15px; margin-top: 20px; display: none; }
+        .hidden { display: none; }
+        #memory-machine h1 { color: #d63031; }
+    </style>
 </head>
-<body style="background-color: #f0f0f0; font-family: sans-serif; text-align: center;">
+<body>
 
-    <h1 style="color: darkblue; margin-top: 50px;">
-        我的設計初體驗
-    </h1>
+    <div id="main-card">
+        <div id="quiz-section">
+            <h2 id="question">準備好接受挑戰了嗎？</h2>
+            <div id="options-container">
+                <button onclick="startQuiz()">開始挑戰</button>
+            </div>
+            <p id="feedback"></p>
+            <img id="answer-img" src="">
+        </div>
 
-    <p style="font-size: 20px; color: #666;">
-        這行字現在置中了，而且顏色變淡了！
-    </p>
-
-    <div style="background-color: white; border: 2px solid #ccc; padding: 20px; width: 300px; margin: 0 auto;">
-        這是一個白色的小框框，像是一個名片盒。
+        <div id="memory-machine" class="hidden">
+            <h1>❤️ 三週年快樂 ❤️</h1>
+            <p>恭喜妳通過考驗！這三年有妳真好。</p>
+            <p>【這裡可以寫下妳想對她說的最感性的話】</p>
+            <img id="final-photo" src="your_final_photo.jpg" style="display:block;">
+        </div>
     </div>
 
+    <script>
+        /* JavaScript：這裡負責控制邏輯 (答對了才跳下一題) */
+        
+        // 【你可以改這裡：題目內容】
+        const quizData = [
+            {
+                q: "去年我們在東京，妳在哪裡買到 Hello Kitty 的？",
+                options: ["原宿", "新宿", "上野"],
+                ans: 0, // 選項從0開始算，0是原宿
+                img: "https://via.placeholder.com/300/ff7675/ffffff?text=Hello+Kitty+Day", // 放照片網址或檔名
+                msg: "沒錯！那天妳超開心的～"
+            },
+            {
+                q: "我們三週年的紀念日是哪一天？",
+                options: ["1/30", "2/1", "2/4"],
+                ans: 2, 
+                img: "https://via.placeholder.com/300/fab1a0/ffffff?text=Special+Day",
+                msg: "這題答錯就太過分囉！"
+            }
+        ];
+
+        let currentQ = 0;
+
+        function startQuiz() {
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const data = quizData[currentQ];
+            document.getElementById('question').innerText = data.q;
+            document.getElementById('feedback').innerText = "";
+            document.getElementById('answer-img').style.display = 'none';
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = ""; 
+            
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(index) {
+            const data = quizData[currentQ];
+            const imgTag = document.getElementById('answer-img');
+            
+            if (index === data.ans) {
+                document.getElementById('feedback').innerText = "✅ " + data.msg;
+                imgTag.src = data.img;
+                imgTag.style.display = 'block';
+                
+                // 答對後過 2 秒跳下一題或結束
+                setTimeout(() => {
+                    currentQ++;
+                    if (currentQ < quizData.length) {
+                        showQuestion();
+                    } else {
+                        showFinal();
+                    }
+                }, 2500);
+            } else {
+                document.getElementById('feedback').innerText = "❌ 答錯啦！再給妳一次機會（或是親我一下）";
+            }
+        }
+
+        function showFinal() {
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('memory-machine').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
