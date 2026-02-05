@@ -8,14 +8,41 @@
         :root { --primary-color: #ff7675; --error-color: #d63031; --bg-color: #fff5f5; }
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
         
-        /* 背景幻燈片 */
-        #slideshow-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: background-image 1.5s ease-in-out; display: none; }
-        #slideshow-bg::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); }
+        /* 幻燈片容器 */
+        #slideshow-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            display: none; /* 初始隱藏 */
+        }
+
+        /* 每一張幻燈片的樣式 */
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 2s ease-in-out; /* 控制淡入淡出的速度 */
+        }
+
+        .slide.active { opacity: 1; }
+
+        /* 深色濾鏡，讓文字更清楚 */
+        #slideshow-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: -1;
+            display: none;
+        }
 
         #main-card { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; position: relative; z-index: 10; transition: 0.5s; }
         
-        /* 最後一頁的毛玻璃效果 */
-        .glass-mode { background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: white !important; }
+        .glass-mode { background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: white !important; }
 
         .btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; margin: 8px; border-radius: 12px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.3s; }
         .hidden { display: none; }
@@ -31,7 +58,8 @@
 </head>
 <body>
 
-<div id="slideshow-bg"></div>
+<div id="slideshow-container"></div>
+<div id="slideshow-overlay"></div>
 
 <div id="main-card">
     <div id="start-section">
@@ -43,10 +71,8 @@
     <div id="quiz-section" class="hidden">
         <h2 id="question">題目載入中...</h2>
         <img id="question-img" class="answer-img" src="">
-        
         <div id="options-container"></div>
         <p id="error-hint">答錯囉，再想一下！😘</p>
-
         <div id="result-area" class="hidden">
             <p id="feedback">✅ 太棒了！答對囉！</p>
             <img id="success-img" class="answer-img" src="img/correct.jpg">
@@ -70,8 +96,6 @@
 </div>
 
 <script>
-    // qImg 會自動對應到 img/q1.jpg, img/q2.jpg...
-    // ans 是正確答案的索引
     const rawQuizData = [
         { q: "這張照片是我們第一次去台南玩的第幾天拍的？", options: ["Day1", "Day2", "Day3"], ans: 0 },
         { q: "這張底片是在哪裡拍的？", options: ["南寮漁港", "大稻埕", "新月沙灣"], ans: 1 },
@@ -95,7 +119,6 @@
         { q: "這是靜怡實習的第幾天？", options: ["Day7", "Day6", "Day5"], ans: 2 }
     ];
 
-    // 自動補全圖片路徑
     const quizData = rawQuizData.map((item, index) => {
         return { ...item, qImg: `img/q${index + 1}.jpg` };
     });
@@ -116,10 +139,8 @@
         document.getElementById('options-container').classList.remove('hidden');
         document.getElementById('error-hint').classList.remove('show-error');
         document.getElementById('progress').style.width = "0%";
-
         const qImgTag = document.getElementById('question-img');
         qImgTag.src = data.qImg;
-
         const container = document.getElementById('options-container');
         container.innerHTML = ""; 
         data.options.forEach((opt, index) => {
@@ -138,9 +159,7 @@
             document.getElementById('question-img').classList.add('hidden');
             document.getElementById('error-hint').classList.remove('show-error');
             document.getElementById('result-area').classList.remove('hidden');
-            
             setTimeout(() => { document.getElementById('progress').style.width = "100%"; }, 50);
-
             setTimeout(() => {
                 currentQ++;
                 if (currentQ < quizData.length) {
@@ -158,8 +177,8 @@
         }
     }
 
-    // 幻燈片相關邏輯
-    const finalPhotos = quizData.map(d => d.qImg); // 使用原本題目的20張圖當背景輪播
+    // --- 幻燈片優化邏輯 ---
+    const finalPhotos = ["img/f1.jpg", "img/f2.jpg", "img/f3.jpg", "img/f4.jpg", "img/f5.jpg"];
     let photoIndex = 0;
 
     function showFinal() {
@@ -168,18 +187,36 @@
         card.classList.add('glass-mode');
         document.getElementById('final-title').style.color = "white";
         
-        const bg = document.getElementById('slideshow-bg');
-        bg.style.display = 'block';
+        // 顯示幻燈片容器
+        const container = document.getElementById('slideshow-container');
+        const overlay = document.getElementById('slideshow-overlay');
+        container.style.display = 'block';
+        overlay.style.display = 'block';
+
+        // 初始化幻燈片圖片元素
+        finalPhotos.forEach((src, index) => {
+            const div = document.createElement('div');
+            div.className = 'slide' + (index === 0 ? ' active' : '');
+            div.style.backgroundImage = `url('${src}')`;
+            container.appendChild(div);
+        });
+
         document.getElementById('memory-machine').classList.remove('hidden');
 
-        changeBg();
-        setInterval(changeBg, 4000);
+        // 開始輪播
+        setInterval(changeBg, 4000); // 每 4 秒換一張圖
     }
 
     function changeBg() {
-        const bg = document.getElementById('slideshow-bg');
-        bg.style.backgroundImage = `url('${finalPhotos[photoIndex]}')`;
-        photoIndex = (photoIndex + 1) % finalPhotos.length;
+        const slides = document.querySelectorAll('.slide');
+        if (slides.length === 0) return;
+
+        // 移除當前圖片的 active
+        slides[photoIndex].classList.remove('active');
+        // 計算下一張
+        photoIndex = (photoIndex + 1) % slides.length;
+        // 加上 active 觸發淡入
+        slides[photoIndex].classList.add('active');
     }
 </script>
 </body>
