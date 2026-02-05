@@ -6,42 +6,50 @@
     <title>Our 3rd Anniversary ❤️</title>
     <style>
         :root { --primary-color: #ff7675; --error-color: #d63031; --bg-color: #fff5f5; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        #main-card { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; position: relative; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        /* 背景幻燈片 */
+        #slideshow-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: background-image 1.5s ease-in-out; display: none; }
+        #slideshow-bg::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); }
+
+        #main-card { background: white; width: 90%; max-width: 450px; padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; position: relative; z-index: 10; transition: 0.5s; }
+        
+        /* 最後一頁的毛玻璃效果 */
+        .glass-mode { background: rgba(255, 255, 255, 0.2) !important; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); color: white !important; }
+
         .btn { background-color: var(--primary-color); color: white; border: none; padding: 12px 25px; margin: 8px; border-radius: 12px; cursor: pointer; font-size: 16px; width: 100%; transition: 0.3s; }
         .hidden { display: none; }
         .answer-img { width: 100%; max-height: 250px; object-fit: cover; border-radius: 15px; margin: 15px 0; border: 2px solid #eee; }
         
-        /* 狀態文字樣式 */
         #feedback { color: #2ecc71; font-weight: bold; margin-top: 10px; }
         #error-hint { color: var(--error-color); font-weight: bold; margin-top: 10px; min-height: 24px; opacity: 0; transition: opacity 0.3s; }
         .show-error { opacity: 1 !important; }
 
-        /* 進度條 */
         .loading-bar-container { background: #eee; height: 6px; border-radius: 3px; margin-top: 15px; overflow: hidden; }
         .loading-bar { height: 100%; background: #fab1a0; width: 0%; transition: width 2.5s linear; }
     </style>
 </head>
 <body>
 
+<div id="slideshow-bg"></div>
+
 <div id="main-card">
     <div id="start-section">
-        <h2 style="font-size: 24px;">Hi Lily！❤️<br>三週年問答挑戰</h2>
-        <p>準備好就點擊開始吧！</p>
+        <h2 style="font-size: 24px;">Hi Lily！❤️<br>三週年 20 題大挑戰</h2>
+        <p>每一題答對後，都會自動進入下一題喔！</p>
         <button class="btn" onclick="startQuiz()">開始挑戰</button>
     </div>
 
     <div id="quiz-section" class="hidden">
         <h2 id="question">題目載入中...</h2>
-        <img id="question-img" class="answer-img hidden" src="">
+        <img id="question-img" class="answer-img" src="">
         
         <div id="options-container"></div>
-        
         <p id="error-hint">答錯囉，再想一下！😘</p>
 
         <div id="result-area" class="hidden">
-            <p id="feedback"></p>
-            <img id="success-img" class="answer-img" src="">
+            <p id="feedback">✅ 太棒了！答對囉！</p>
+            <img id="success-img" class="answer-img" src="img/correct.jpg">
             <div class="loading-bar-container">
                 <div id="progress" class="loading-bar"></div>
             </div>
@@ -50,31 +58,48 @@
     </div>
 
     <div id="memory-machine" class="hidden">
-        <h1 style="color: #d63031;">Happy 3rd Anniversary!</h1>
-        <p>謝謝妳這三年的陪伴。</p>
-        <img src="img/final.jpg" class="answer-img" style="display:block;" onerror="this.src='https://via.placeholder.com/400x300?text=I+Love+You'">
+        <h1 style="color: #ff7675;" id="final-title">Happy 3rd Anniversary!</h1>
+        <div style="text-align: left; line-height: 1.8;">
+            <p>親愛的 Lily：</p>
+            <p>恭喜妳通過了地獄級的 20 題挑戰！</p>
+            <p>這三年的點點滴滴，謝謝妳一直都在。</p>
+            <p>【這裡可以繼續寫下妳想說的話...】</p>
+            <p style="text-align: right;">永遠愛妳的 [你的名字]</p>
+        </div>
     </div>
 </div>
 
 <script>
-    const quizData = [
-        {
-            q: "去年我們在東京，妳在哪裡買到 Hello Kitty 的？",
-            qImg: "", 
-            options: ["原宿", "新宿", "上野"],
-            ans: 0,
-            sImg: "img/s1.jpg", 
-            msg: "✅ 沒錯！就是在原宿買到的！"
-        },
-        {
-            q: "這張照片是我們在哪裡拍的？",
-            qImg: "img/q2.jpg", 
-            options: ["淡水", "九份", "基隆"],
-            ans: 1,
-            sImg: "img/s2.jpg",
-            msg: "✅ 答對了！那天九份的霧好大。"
-        }
+    // 【在這裡填寫你的題目】
+    // qImg 會自動對應到 img/q1.jpg, img/q2.jpg...
+    // ans 是正確答案的索引 (0代表第一個選項, 1代表第二個, 2代表第三個)
+    const rawQuizData = [
+        { q: "Q1：這張照片是我們第一次去台南玩的第幾天拍的？", options: ["Day1", "Day2", "Day3"], ans: 0 },
+        { q: "Q2：請問這張照片是在哪裡拍的？", options: ["劍湖山遊樂園", "兒童新樂園", "六福村"], ans: 1 },
+        { q: "Q3：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 2 },
+        { q: "Q4：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q5：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q6：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q7：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q8：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q9：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q10：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q11：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q12：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q13：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q14：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q15：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q16：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q17：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q18：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q19：這裡填寫妳的問題？", options: ["選項A", "選項B", "選項C"], ans: 0 },
+        { q: "Q20：這裡填寫妳的問題？", options: ["最後一題：妳準備好跟我過第四年了嗎？", "準備好了", "當然"], ans: 0 }
     ];
+
+    // 自動補全圖片路徑
+    const quizData = rawQuizData.map((item, index) => {
+        return { ...item, qImg: `img/q${index + 1}.jpg` };
+    });
 
     let currentQ = 0;
     let errorTimeout;
@@ -94,12 +119,7 @@
         document.getElementById('progress').style.width = "0%";
 
         const qImgTag = document.getElementById('question-img');
-        if(data.qImg) {
-            qImgTag.src = data.qImg;
-            qImgTag.classList.remove('hidden');
-        } else {
-            qImgTag.classList.add('hidden');
-        }
+        qImgTag.src = data.qImg;
 
         const container = document.getElementById('options-container');
         container.innerHTML = ""; 
@@ -115,14 +135,10 @@
     function checkAnswer(index) {
         const data = quizData[currentQ];
         if (index === data.ans) {
-            // 答對邏輯
             document.getElementById('options-container').classList.add('hidden');
             document.getElementById('question-img').classList.add('hidden');
             document.getElementById('error-hint').classList.remove('show-error');
             document.getElementById('result-area').classList.remove('hidden');
-            
-            document.getElementById('feedback').innerText = data.msg;
-            document.getElementById('success-img').src = data.sImg;
             
             setTimeout(() => { document.getElementById('progress').style.width = "100%"; }, 50);
 
@@ -130,25 +146,41 @@
                 currentQ++;
                 if (currentQ < quizData.length) {
                     showQuestion();
+                    document.getElementById('question-img').classList.remove('hidden');
                 } else {
                     showFinal();
                 }
             }, 2500);
         } else {
-            // 答錯邏輯：顯示紅字提示，2秒後消失
             const errorHint = document.getElementById('error-hint');
             errorHint.classList.add('show-error');
-            
             clearTimeout(errorTimeout);
-            errorTimeout = setTimeout(() => {
-                errorHint.classList.remove('show-error');
-            }, 2000);
+            errorTimeout = setTimeout(() => { errorHint.classList.remove('show-error'); }, 2000);
         }
     }
 
+    // 幻燈片相關邏輯
+    const finalPhotos = quizData.map(d => d.qImg); // 使用原本題目的20張圖當背景輪播
+    let photoIndex = 0;
+
     function showFinal() {
         document.getElementById('quiz-section').classList.add('hidden');
+        const card = document.getElementById('main-card');
+        card.classList.add('glass-mode');
+        document.getElementById('final-title').style.color = "white";
+        
+        const bg = document.getElementById('slideshow-bg');
+        bg.style.display = 'block';
         document.getElementById('memory-machine').classList.remove('hidden');
+
+        changeBg();
+        setInterval(changeBg, 4000);
+    }
+
+    function changeBg() {
+        const bg = document.getElementById('slideshow-bg');
+        bg.style.backgroundImage = `url('${finalPhotos[photoIndex]}')`;
+        photoIndex = (photoIndex + 1) % finalPhotos.length;
     }
 </script>
 </body>
